@@ -57,18 +57,13 @@ export default defineEndpoint((router, { services }) => {
 			res.status(403);
 			return res.send(`You don't have permission to access this.`);
 		}
-		/* 
-		
-		TODO: Wie an Framerate kommen? Doch mit nested Werten und auch File abfragen? 
-		Oder vll als endpoint /chapters/abc-def-ghi-jkl?framerate=30
-		
-		*/
+
 		const collection = "scenes";
 		const primaryKey = req.params["pk"]!;
 		const framerate = Number(req.query["framerate"]);
 
-		if (framerate) {
-			console.log(framerate);
+		if (!framerate) {
+			return res.status(400).json({ error: 'Framerate is required.' });
 		}
 
 		const itemService = new ItemsService(collection, {

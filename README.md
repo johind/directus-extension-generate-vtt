@@ -1,6 +1,8 @@
 # Endpoint to generate VTT Data
 
-This is a very basic Directus endpoint to generate a Video Text Tracks (VTT) file dynamically. Given a list of Scene objects, as defined below, which are related to a video, it calculates and formats timecodes for video frames, producing a VTT file containing chapter information.
+This is a very basic (proof of concept) Directus endpoint to generate a Video Text Tracks (VTT) file dynamically. 
+
+Given a list of Scene objects, as defined below, which are related to a video, it calculates and formats timecodes for video frames, producing a VTT file containing chapter information.
 
 ```ts
 type Scene = {

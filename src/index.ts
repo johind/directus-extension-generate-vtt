@@ -2,8 +2,12 @@ import { defineEndpoint } from "@directus/extensions-sdk";
 import { generateChapterVtt } from "./utils";
 import type { Footage } from "./types";
 
-export default defineEndpoint((router, { services }) => {
+export default defineEndpoint(async (router, context) => {
+	const { services, getSchema } = context;
 	const { ItemsService } = services;
+
+	const schema = await getSchema();
+	const footageService = new ItemsService("footage", { schema });
 
 	router.get("/", (_req, res) => {
 		// @ts-ignore
@@ -15,7 +19,6 @@ export default defineEndpoint((router, { services }) => {
 		return res.status(400).json({ error: "Missing required parameter: id" });
 	});
 
-	// pk = primaryKey
 	// @ts-ignore
 	router.get("/chapters/:pk", async (req, res) => {
 		// @ts-ignore
@@ -25,14 +28,6 @@ export default defineEndpoint((router, { services }) => {
 		}
 
 		const primaryKey = req.params["pk"]!;
-		const collection = "footage";
-
-		const footageService = new ItemsService(collection, {
-			// @ts-ignore
-			accountability: req.accountability,
-			// @ts-ignore
-			schema: req.schema,
-		});
 
 		try {
 

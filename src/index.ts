@@ -9,7 +9,7 @@ export default defineEndpoint(async (router, context) => {
 	const schema = await getSchema();
 	const footageService = new ItemsService("footage", { schema });
 
-	router.get("/", (_req, res) => {
+	router.get("/", async (_req, res) => {
 		// @ts-ignore
 		if (_req.accountability?.user == null) {
 			res.status(403);
@@ -19,7 +19,6 @@ export default defineEndpoint(async (router, context) => {
 		return res.status(400).json({ error: "Missing required parameter: id" });
 	});
 
-	// @ts-ignore
 	router.get("/chapters/:pk", async (req, res) => {
 		// @ts-ignore
 		if (req.accountability?.user == null) {
@@ -46,7 +45,7 @@ export default defineEndpoint(async (router, context) => {
 			res.header("Content-Disposition", "attachment; filename=chapters.vtt");
 
 			// Send the VTT data in the response
-			res.send(vttData);
+			return res.send(vttData);
 		} catch (error: any) {
 			res.setHeader("error", error);
 			return res.sendStatus(401); // TODO

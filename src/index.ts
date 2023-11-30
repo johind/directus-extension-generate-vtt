@@ -1,48 +1,12 @@
 import { defineEndpoint } from "@directus/extensions-sdk";
-
-type Scene = { index: number; footage_in: number; footage_out: number };
-
-function generateChapterVtt(chapters: Scene[], framerate: number): string {
-	const vttHeader = "WEBVTT\n\n";
-
-	const vttContent = chapters
-		.map((chapter) => {
-			const startTime = convertFrameToTimecode(chapter.footage_in, framerate);
-			const endTime = convertFrameToTimecode(chapter.footage_out, framerate);
-			const title = `Chapter ${chapter.index + 1}`;
-
-			return `${startTime} --> ${endTime}\n${title}`;
-		})
-		.join("\n\n");
-
-	return vttHeader + vttContent;
-}
-
-function convertFrameToTimecode(
-	frameNumber: number,
-	framerate: number
-): string {
-	// Calculate total seconds
-	const totalSeconds = frameNumber / framerate;
-
-	// Calculate minutes
-	const minutes = Math.floor(totalSeconds / 60);
-
-	// Calculate remaining seconds with three decimal places
-	const remainingSeconds = (totalSeconds % 60).toFixed(3);
-
-	// Format the timecode as a string with leading zeros
-	const formattedTimecode = `${String(minutes).padStart(2, "0")}:${String(
-		remainingSeconds
-	).padStart(6, "0")}`;
-
-	return formattedTimecode;
-}
+import { generateChapterVtt } from "./utils";
+import type { Footage } from "./types";
 
 export default defineEndpoint((router, { services }) => {
 	const { ItemsService } = services;
 
 	router.get("/", (_req, res) => {
+		// @ts-ignore
 		if (_req.accountability?.user == null) {
 			res.status(403);
 			return res.send(`You don't have permission to access this.`);
@@ -52,31 +16,33 @@ export default defineEndpoint((router, { services }) => {
 	});
 
 	// pk = primaryKey
-	router.get("/:pk", async (req, res) => {
+	// @ts-ignore
+	router.get("/chapters/:pk", async (req, res) => {
+		// @ts-ignore
 		if (req.accountability?.user == null) {
 			res.status(403);
 			return res.send(`You don't have permission to access this.`);
 		}
 
-		const collection = "scenes";
 		const primaryKey = req.params["pk"]!;
-		const framerate = Number(req.query["framerate"]);
+		const collection = "footage";
 
-		if (!framerate) {
-			return res.status(400).json({ error: 'Framerate is required.' });
-		}
-
-		const itemService = new ItemsService(collection, {
+		const footageService = new ItemsService(collection, {
+			// @ts-ignore
 			accountability: req.accountability,
+			// @ts-ignore
 			schema: req.schema,
 		});
 
 		try {
-			const scenes = (await itemService.readByQuery({
-				fields: ["index", "footage_in", "footage_out"],
-				sort: ["index"],
-				filter: { footage_id: { _eq: primaryKey } },
-			})) as Scene[];
+
+			const footage = (await footageService.readOne(primaryKey, {
+				fields: ["scenes.index", "scenes.footage_in", "scenes.footage_out", "file.metadata"],
+				deep: { scenes: { _sort: ["index"] } },
+			})) as Footage;
+
+			const framerate = footage.file.metadata.frame_rate;
+			const scenes = footage.scenes;
 
 			const vttData = generateChapterVtt(scenes, framerate);
 
@@ -87,6 +53,7 @@ export default defineEndpoint((router, { services }) => {
 			// Send the VTT data in the response
 			res.send(vttData);
 		} catch (error: any) {
+			res.setHeader("error", error);
 			return res.sendStatus(401); // TODO
 		}
 	});

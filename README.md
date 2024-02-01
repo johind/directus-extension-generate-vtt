@@ -24,7 +24,7 @@ A utility function used internally to convert a frame number to a timecode strin
 
 ## How to use it
 
-Clone the repository and run the build command `npm run build`. This will save the created `index.js` extension file to the dist folder. Move the file to the `extensions/endpoints/<name of the extension>` folder and restart directus.
+Clone the repository and run the build command `npm run build`. This will save the created `index.js` extension file to the dist folder. Move the file to the `/extensions/endpoints/<name of the extension>` folder of your directus instance and restart directus.
 
 As this is a proof of concept, the endpoint only assumes the existence of the `footage` and `scenes` data models with the following properties
 

@@ -44,7 +44,7 @@ type Footage = {
 };
 ```
 
-So to make it work with your code, you will probably need to edit the extension code and adapt it to your specific data models that you have defined in directus! If you don't do this, you will get an `Unauthorized` response from the server. See this [issue]("https://github.com/johind/directus-extension-generate-vtt/issues/2") for more information on it.
+So to make it work with your code, you will probably need to edit the extension code and adapt it to your specific data models that you have defined in directus! If you don't do this, you will get an `Unauthorized` response from the server. See this [issue](https://github.com/johind/directus-extension-generate-vtt/issues/2) for more information on it.
 
 ### Endpoint
 
